@@ -9,9 +9,10 @@ const SessionManager = require('./auth/session-manager');
 const FileOperations = require('./fs-operations/file-operations');
 const DirectoryOperations = require('./fs-operations/directory-operations');
 const SyncVsAsyncDemo = require('./fs-operations/sync-vs-async-demo');
+const apiSpec = require('./api-docs');
 
 // Configuration
-const PORT = 3000;
+const PORT = 3001;
 const DATA_PATH = path.join(__dirname, 'data');
 
 // Initialize components
@@ -80,6 +81,10 @@ function handleRequest(req, res, method, pathname, query, body) {
             handleDemoPerformance(req, res, query);
         } else if (pathname === '/sessions' && method === 'GET') {
             handleSessions(req, res);
+        } else if (pathname === '/docs' && method === 'GET') {
+            handleApiDocs(req, res);
+        } else if (pathname === '/docs.json' && method === 'GET') {
+            handleApiSpec(req, res);
         } else {
             sendResponse(res, 404, { error: 'Endpoint not found' });
         }
@@ -293,6 +298,176 @@ function handleSessions(req, res) {
     sendResponse(res, 200, { sessions });
 }
 
+function handleApiDocs(req, res) {
+    // Serve HTML documentation page
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure File Management System API Documentation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        h2 { color: #007bff; margin-top: 30px; }
+        .endpoint { background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid #007bff; border-radius: 4px; }
+        .method { display: inline-block; padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold; margin-right: 10px; }
+        .GET { background: #28a745; }
+        .POST { background: #007bff; }
+        .DELETE { background: #dc3545; }
+        .path { font-family: monospace; font-weight: bold; }
+        .description { margin: 10px 0; color: #666; }
+        .params { background: #e9ecef; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .code { background: #f8f9fa; padding: 15px; border-radius: 4px; font-family: monospace; margin: 10px 0; overflow-x: auto; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 20px; color: #007bff; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Secure File Management System API</h1>
+        
+        <div class="nav">
+            <a href="#authentication">Authentication</a>
+            <a href="#file-operations">File Operations</a>
+            <a href="#directory-operations">Directory Operations</a>
+            <a href="#demonstrations">Demonstrations</a>
+            <a href="#administration">Administration</a>
+            <a href="/docs.json">OpenAPI Spec (JSON)</a>
+        </div>
+
+        <h2 id="authentication">🔑 Authentication</h2>
+        
+        <div class="endpoint">
+            <span class="method POST">POST</span>
+            <span class="path">/login</span>
+            <div class="description">User authentication - returns session token</div>
+            <div class="code">
+curl -X POST http://localhost:3001/login \\
+  -H "Content-Type: application/json" \\
+  -d '{"username":"alice","password":"password123"}'
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method POST">POST</span>
+            <span class="path">/logout</span>
+            <div class="description">User logout - destroy session token</div>
+        </div>
+
+        <h2 id="file-operations">📁 File Operations</h2>
+        
+        <div class="endpoint">
+            <span class="method GET">GET</span>
+            <span class="path">/file/read?filename=&lt;name&gt;</span>
+            <div class="description">Read file content (requires authentication)</div>
+            <div class="params">Parameters: filename (required)</div>
+            <div class="code">
+curl -X GET "http://localhost:3001/file/read?filename=test.txt" \\
+  -H "Authorization: Bearer &lt;token&gt;"
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method POST">POST</span>
+            <span class="path">/file/write</span>
+            <div class="description">Write content to file (requires authentication)</div>
+            <div class="code">
+curl -X POST http://localhost:3001/file/write \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer &lt;token&gt;" \\
+  -d '{"filename":"example.txt","content":"Hello World"}'
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method DELETE">DELETE</span>
+            <span class="path">/file/delete?filename=&lt;name&gt;</span>
+            <div class="description">Delete file (requires authentication)</div>
+        </div>
+
+        <h2 id="directory-operations">📂 Directory Operations</h2>
+        
+        <div class="endpoint">
+            <span class="method POST">POST</span>
+            <span class="path">/dir/create</span>
+            <div class="description">Create directory (requires authentication)</div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method DELETE">DELETE</span>
+            <span class="path">/dir/delete?dirname=&lt;name&gt;</span>
+            <div class="description">Delete directory (requires authentication)</div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method GET">GET</span>
+            <span class="path">/dir/list?dirname=&lt;name&gt;</span>
+            <div class="description">List directory contents (requires authentication)</div>
+        </div>
+
+        <h2 id="demonstrations">🚀 Demonstrations</h2>
+        
+        <div class="endpoint">
+            <span class="method GET">GET</span>
+            <span class="path">/demo/sync</span>
+            <div class="description">Synchronous file operations demo</div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method GET">GET</span>
+            <span class="path">/demo/async</span>
+            <div class="description">Asynchronous file operations demo</div>
+        </div>
+
+        <div class="endpoint">
+            <span class="method GET">GET</span>
+            <span class="path">/demo/performance?iterations=&lt;n&gt;</span>
+            <div class="description">Performance comparison (sync vs async)</div>
+        </div>
+
+        <h2 id="administration">⚙️ Administration</h2>
+        
+        <div class="endpoint">
+            <span class="method GET">GET</span>
+            <span class="path">/sessions</span>
+            <div class="description">List active sessions (admin only)</div>
+        </div>
+
+        <h2>🔐 Authorization</h2>
+        <p>This API uses Bearer token authentication. Include the token in the Authorization header:</p>
+        <div class="code">Authorization: Bearer &lt;your_token_here&gt;</div>
+
+        <h2>👥 Users & Permissions</h2>
+        <ul>
+            <li><strong>Alice</strong>: Admin, IT, Clearance 5 (Full access)</li>
+            <li><strong>Bob</strong>: Resident, Estate-A, Clearance 1 (Read/Write files)</li>
+            <li><strong>Charlie</strong>: Rider, Logistics, Clearance 2 (Read files only)</li>
+        </ul>
+
+        <h2>📊 OpenAPI Specification</h2>
+        <p>For the complete OpenAPI 3.0 specification, visit <a href="/docs.json">/docs.json</a></p>
+        
+        <p style="margin-top: 40px; text-align: center; color: #666;">
+            Built with pure Node.js - No external libraries required
+        </p>
+    </div>
+</body>
+</html>`;
+    
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(html);
+}
+
+function handleApiSpec(req, res) {
+    // Serve OpenAPI JSON specification
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(apiSpec, null, 2));
+}
+
 // Utility function to send JSON responses
 function sendResponse(res, statusCode, data) {
     res.writeHead(statusCode, { 'Content-Type': 'application/json' });
@@ -316,6 +491,8 @@ server.listen(PORT, () => {
     console.log('  GET  /demo/async - Asynchronous demo');
     console.log('  GET  /demo/performance?iterations=<n> - Performance comparison');
     console.log('  GET  /sessions - List active sessions');
+    console.log('  GET  /docs - API Documentation (HTML)');
+    console.log('  GET  /docs.json - OpenAPI Specification (JSON)');
 });
 
 // Cleanup expired sessions every 5 minutes
