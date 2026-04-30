@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure File Management System - Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.18.0/swagger-ui.css" />
+    <style>
+        html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
+        *, *:before, *:after { box-sizing: inherit; }
+        body { margin: 0; background: #fafafa; }
+        .swagger-ui .topbar { display: none; }
+        .custom-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .custom-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .custom-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .info-section {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .user-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .user-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .user-card h4 { margin: 0 0 10px 0; color: #333; }
+        .user-card .role { background: #007bff; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; margin: 2px; display: inline-block; }
+        .user-card .clearance { background: #28a745; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="custom-header">
+        <h1>🔐 Secure File Management System</h1>
+        <p>Interactive API Documentation & Testing</p>
+    </div>
+    
+    <div class="info-section">
+        <h3>👥 Test Users & Permissions</h3>
+        <div class="user-info">
+            <div class="user-card">
+                <h4>Alice (Admin)</h4>
+                <div><span class="role">admin</span> <span class="role">it</span></div>
+                <div><span class="clearance">Clearance: 5</span></div>
+                <p>Full access to all operations</p>
+            </div>
+            <div class="user-card">
+                <h4>Bob (Resident)</h4>
+                <div><span class="role">resident</span></div>
+                <div><span class="clearance">Clearance: 1</span></div>
+                <p>Can read and write files</p>
+            </div>
+            <div class="user-card">
+                <h4>Charlie (Rider)</h4>
+                <div><span class="role">rider</span></div>
+                <div><span class="clearance">Clearance: 2</span></div>
+                <p>Can only read files</p>
+            </div>
+        </div>
+        
+        <h3>🚀 Quick Testing Steps</h3>
+        <ol>
+            <li><strong>Authenticate:</strong> Use the <code>/login</code> endpoint to get a token</li>
+            <li><strong>Copy Token:</strong> Copy the token from the login response</li>
+            <li><strong>Authorize:</strong> Click "Authorize" button and paste your token (format: <code>Bearer YOUR_TOKEN</code>)</li>
+            <li><strong>Test Endpoints:</strong> Try different operations with various users</li>
+        </ol>
+        
+        <h3>🔐 Authorization Testing</h3>
+        <ul>
+            <li><strong>Alice:</strong> Should access all endpoints successfully</li>
+            <li><strong>Bob:</strong> Can read/write files but cannot create directories</li>
+            <li><strong>Charlie:</strong> Can only read files, write operations should fail with 403</li>
+        </ul>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@4.18.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@4.18.0/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: '/docs.json',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                defaultModelsExpandDepth: 2,
+                defaultModelExpandDepth: 2,
+                displayRequestDuration: true,
+                filter: true,
+                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+                onComplete: function() {
+                    console.log("Swagger UI loaded successfully");
+                },
+                requestInterceptor: function(request) {
+                    // Add any request interceptors here
+                    return request;
+                },
+                responseInterceptor: function(response) {
+                    // Add any response interceptors here
+                    return response;
+                }
+            });
+
+            // Add custom styling for better user experience
+            setTimeout(() => {
+                const authorizeBtn = document.querySelector('.authorize');
+                if (authorizeBtn) {
+                    authorizeBtn.style.background = '#007bff';
+                    authorizeBtn.style.color = 'white';
+                }
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
