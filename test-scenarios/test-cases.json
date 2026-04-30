@@ -1,0 +1,347 @@
+{
+  "testCases": [
+    {
+      "id": "auth_001",
+      "name": "Valid Login - Alice",
+      "description": "Test successful login with valid credentials for Alice (Admin)",
+      "method": "POST",
+      "endpoint": "/login",
+      "body": {
+        "username": "alice",
+        "password": "password123"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["token", "user.username", "user.roles", "user.clearance"]
+    },
+    {
+      "id": "auth_002",
+      "name": "Invalid Login - Wrong Password",
+      "description": "Test login failure with invalid password",
+      "method": "POST",
+      "endpoint": "/login",
+      "body": {
+        "username": "alice",
+        "password": "wrongpassword"
+      },
+      "expectedStatus": 401,
+      "expectedFields": ["error"]
+    },
+    {
+      "id": "auth_003",
+      "name": "Invalid Login - Nonexistent User",
+      "description": "Test login failure with nonexistent user",
+      "method": "POST",
+      "endpoint": "/login",
+      "body": {
+        "username": "nonexistent",
+        "password": "password123"
+      },
+      "expectedStatus": 401,
+      "expectedFields": ["error"]
+    },
+    {
+      "id": "file_001",
+      "name": "File Read - Alice (Admin)",
+      "description": "Test file read access for admin user",
+      "method": "GET",
+      "endpoint": "/file/read",
+      "query": {
+        "filename": "test.txt"
+      },
+      "headers": {
+        "Authorization": "Bearer {alice_token}"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["content", "metadata"]
+    },
+    {
+      "id": "file_002",
+      "name": "File Read - Bob (Resident)",
+      "description": "Test file read access for resident user",
+      "method": "GET",
+      "endpoint": "/file/read",
+      "query": {
+        "filename": "test.txt"
+      },
+      "headers": {
+        "Authorization": "Bearer {bob_token}"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["content", "metadata"]
+    },
+    {
+      "id": "file_003",
+      "name": "File Read - Charlie (Rider)",
+      "description": "Test file read access for rider user",
+      "method": "GET",
+      "endpoint": "/file/read",
+      "query": {
+        "filename": "test.txt"
+      },
+      "headers": {
+        "Authorization": "Bearer {charlie_token}"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["content", "metadata"]
+    },
+    {
+      "id": "file_004",
+      "name": "File Write - Alice (Admin)",
+      "description": "Test file write access for admin user",
+      "method": "POST",
+      "endpoint": "/file/write",
+      "body": {
+        "filename": "admin_file.txt",
+        "content": "This file was written by admin"
+      },
+      "headers": {
+        "Authorization": "Bearer {alice_token}"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["metadata"]
+    },
+    {
+      "id": "file_005",
+      "name": "File Write - Bob (Resident)",
+      "description": "Test file write access for resident user",
+      "method": "POST",
+      "endpoint": "/file/write",
+      "body": {
+        "filename": "resident_file.txt",
+        "content": "This file was written by resident"
+      },
+      "headers": {
+        "Authorization": "Bearer {bob_token}"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["metadata"]
+    },
+    {
+      "id": "file_006",
+      "name": "File Write - Charlie (Rider) - Should Fail",
+      "description": "Test file write denial for rider user (insufficient clearance)",
+      "method": "POST",
+      "endpoint": "/file/write",
+      "body": {
+        "filename": "rider_file.txt",
+        "content": "This should fail"
+      },
+      "headers": {
+        "Authorization": "Bearer {charlie_token}"
+      },
+      "expectedStatus": 403,
+      "expectedFields": ["error"]
+    },
+    {
+      "id": "file_007",
+      "name": "File Delete - Alice (Admin)",
+      "description": "Test file delete access for admin user",
+      "method": "DELETE",
+      "endpoint": "/file/delete",
+      "query": {
+        "filename": "test_delete.txt"
+      },
+      "headers": {
+        "Authorization": "Bearer {alice_token}"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["message"]
+    },
+    {
+      "id": "file_008",
+      "name": "File Delete - Bob (Resident) - Should Fail",
+      "description": "Test file delete denial for resident user (insufficient clearance)",
+      "method": "DELETE",
+      "endpoint": "/file/delete",
+      "query": {
+        "filename": "test_delete.txt"
+      },
+      "headers": {
+        "Authorization": "Bearer {bob_token}"
+      },
+      "expectedStatus": 403,
+      "expectedFields": ["error"]
+    },
+    {
+      "id": "dir_001",
+      "name": "Directory Create - Alice (Admin)",
+      "description": "Test directory creation for admin user",
+      "method": "POST",
+      "endpoint": "/dir/create",
+      "body": {
+        "dirname": "admin_directory"
+      },
+      "headers": {
+        "Authorization": "Bearer {alice_token}"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["metadata"]
+    },
+    {
+      "id": "dir_002",
+      "name": "Directory Create - Bob (Resident) - Should Fail",
+      "description": "Test directory creation denial for resident user",
+      "method": "POST",
+      "endpoint": "/dir/create",
+      "body": {
+        "dirname": "resident_directory"
+      },
+      "headers": {
+        "Authorization": "Bearer {bob_token}"
+      },
+      "expectedStatus": 403,
+      "expectedFields": ["error"]
+    },
+    {
+      "id": "dir_003",
+      "name": "Directory List - Alice (Admin)",
+      "description": "Test directory listing for admin user",
+      "method": "GET",
+      "endpoint": "/dir/list",
+      "query": {
+        "dirname": "."
+      },
+      "headers": {
+        "Authorization": "Bearer {alice_token}"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["path", "items"]
+    },
+    {
+      "id": "dir_004",
+      "name": "Directory List - Bob (Resident)",
+      "description": "Test directory listing for resident user",
+      "method": "GET",
+      "endpoint": "/dir/list",
+      "query": {
+        "dirname": "."
+      },
+      "headers": {
+        "Authorization": "Bearer {bob_token}"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["path", "items"]
+    },
+    {
+      "id": "abac_001",
+      "name": "ABAC Time-Based Access - IT Staff After Hours",
+      "description": "Test ABAC time-based restriction for IT staff accessing system resources after hours",
+      "method": "GET",
+      "endpoint": "/file/read",
+      "query": {
+        "filename": "system_config.txt"
+      },
+      "headers": {
+        "Authorization": "Bearer {alice_token}",
+        "X-Time": "2024-01-01T22:00:00Z"
+      },
+      "expectedStatus": 403,
+      "expectedFields": ["error"]
+    },
+    {
+      "id": "abac_002",
+      "name": "ABAC Location-Based Access - Wrong Location",
+      "description": "Test ABAC location-based restriction for user accessing from wrong location",
+      "method": "POST",
+      "endpoint": "/file/write",
+      "body": {
+        "filename": "location_test.txt",
+        "content": "This should fail due to location"
+      },
+      "headers": {
+        "Authorization": "Bearer {bob_token}",
+        "X-Location": "wrong-location"
+      },
+      "expectedStatus": 403,
+      "expectedFields": ["error"]
+    },
+    {
+      "id": "demo_001",
+      "name": "Synchronous Demo",
+      "description": "Test synchronous file operations demo",
+      "method": "GET",
+      "endpoint": "/demo/sync",
+      "expectedStatus": 200,
+      "expectedFields": ["content", "stats", "duration", "blocking"]
+    },
+    {
+      "id": "demo_002",
+      "name": "Asynchronous Demo",
+      "description": "Test asynchronous file operations demo",
+      "method": "GET",
+      "endpoint": "/demo/async",
+      "expectedStatus": 200,
+      "expectedFields": ["content", "stats", "duration", "blocking"]
+    },
+    {
+      "id": "demo_003",
+      "name": "Performance Comparison",
+      "description": "Test performance comparison between sync and async operations",
+      "method": "GET",
+      "endpoint": "/demo/performance",
+      "query": {
+        "iterations": "10"
+      },
+      "expectedStatus": 200,
+      "expectedFields": ["sync", "async", "improvement"]
+    },
+    {
+      "id": "security_001",
+      "name": "No Token - Should Fail",
+      "description": "Test access without authentication token",
+      "method": "GET",
+      "endpoint": "/file/read",
+      "query": {
+        "filename": "test.txt"
+      },
+      "expectedStatus": 401,
+      "expectedFields": ["error"]
+    },
+    {
+      "id": "security_002",
+      "name": "Invalid Token - Should Fail",
+      "description": "Test access with invalid authentication token",
+      "method": "GET",
+      "endpoint": "/file/read",
+      "query": {
+        "filename": "test.txt"
+      },
+      "headers": {
+        "Authorization": "Bearer invalid_token"
+      },
+      "expectedStatus": 401,
+      "expectedFields": ["error"]
+    },
+    {
+      "id": "security_003",
+      "name": "Path Traversal Attack - Should Fail",
+      "description": "Test protection against path traversal attacks",
+      "method": "GET",
+      "endpoint": "/file/read",
+      "query": {
+        "filename": "../../../etc/passwd"
+      },
+      "headers": {
+        "Authorization": "Bearer {alice_token}"
+      },
+      "expectedStatus": 403,
+      "expectedFields": ["error"]
+    }
+  ],
+  "setup": {
+    "description": "Setup steps before running tests",
+    "steps": [
+      "Start the server on port 3000",
+      "Create initial test files in data directory",
+      "Obtain authentication tokens for test users"
+    ]
+  },
+  "cleanup": {
+    "description": "Cleanup steps after running tests",
+    "steps": [
+      "Remove test files created during tests",
+      "Destroy active sessions",
+      "Stop the server"
+    ]
+  }
+}
